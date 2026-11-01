@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lern-Welt</title>
+<style>
+  :root{
+    --bg:#eaf6ff; --card:#ffffff; --text:#1f2a44; --muted:#6b7a99;
+    --blue:#3b82f6; --green:#22c55e; --red:#ef4444; --yellow:#facc15;
+    --orange:#fb923c; --purple:#a855f7; --pink:#ec4899;
+    --shadow:0 6px 0 rgba(0,0,0,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,sans-serif}
+  body{background:var(--bg);color:var(--text);min-height:100vh}
+  button{cursor:pointer;border:none;font:inherit}
+  .wrap{max-width:820px;margin:0 auto;padding:16px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:8px;
+         background:var(--card);border-radius:20px;padding:12px 18px;box-shadow:var(--shadow);margin-bottom:20px;flex-wrap:wrap}
+  .logo{font-size:1.5rem;font-weight:800;color:var(--blue)}
+  .logo span{color:var(--orange)}
+  .stats{display:flex;gap:10px;font-weight:700}
+  .pill{background:#f1f5ff;border-radius:999px;padding:6px 12px}
+  .screen{display:none;animation:pop .25s ease}
+  .screen.active{display:block}
+  @keyframes pop{from{transform:scale(.97);opacity:0}to{transform:scale(1);opacity:1}}
+  h1{font-size:1.8rem;margin-bottom:6px}
+  h2{font-size:1.4rem;margin-bottom:14px}
+  p.sub{color:var(--muted);margin-bottom:20px}
+  .card{background:var(--card);border-radius:24px;padding:24px;box-shadow:var(--shadow)}
+  input[type=text]{width:100%;font-size:1.3rem;padding:14px;border-radius:14px;border:3px solid #d6e4ff;margin:14px 0;outline:none}
+  input[type=text]:focus{border-color:var(--blue)}
+  .btn{background:var(--blue);color:#fff;font-size:1.2rem;font-weight:700;padding:14px 28px;border-radius:16px;box-shadow:0 5px 0 #1d4ed8;transition:transform .1s}
+  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #1d4ed8}
+  .btn.green{background:var(--green);box-shadow:0 5px 0 #15803d}
+  .btn.gray{background:#94a3b8;box-shadow:0 5px 0 #64748b}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px}
+  .tile{border-radius:24px;padding:22px 16px;color:#fff;text-align:center;box-shadow:var(--shadow);transition:transform .15s}
+  .tile:hover{transform:translateY(-4px) rotate(-1deg)}
+  .tile .ico{font-size:3rem;display:block;margin-bottom:6px}
+  .tile b{font-size:1.25rem;display:block}
+  .tile small{opacity:.9}
+  .level{background:var(--card);color:var(--text);border-radius:20px;padding:16px;text-align:left;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;width:100%;margin-bottom:12px}
+  .level .num{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:1.2rem;flex-shrink:0}
+  .level .info{flex:1}
+  .level .stars{font-size:1.2rem;letter-spacing:2px}
+  .back{background:none;color:var(--blue);font-weight:700;font-size:1.1rem;margin-bottom:14px}
+  .progress{height:16px;background:#dbe7ff;border-radius:999px;overflow:hidden;margin-bottom:22px}
+  .progress div{height:100%;background:var(--green);width:0;transition:width .3s}
+  .question{font-size:2.2rem;font-weight:800;text-align:center;margin:10px 0 26px;min-height:60px}
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .answer{background:#fff;border:4px solid #d6e4ff;border-radius:18px;padding:18px;font-size:1.5rem;font-weight:700;color:var(--text);box-shadow:0 5px 0 #c7d7f5}
+  .answer:hover{border-color:var(--blue)}
+  .answer.right{background:#dcfce7;border-color:var(--green)}
+  .answer.wrong{background:#fee2e2;border-color:var(--red);animation:shake .3s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .feedback{text-align:center;font-size:1.3rem;font-weight:700;min-height:36px;margin-top:18px}
+  .big{font-size:4rem;text-align:center}
+  .center{text-align:center}
+  .mt{margin-top:18px}
+  .shop{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px}
+  .item{background:#fff;border-radius:20px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+  .item .ico{font-size:2.6rem}
+  .item button{margin-top:8px;padding:8px 14px;font-size:1rem}
+  .avatar{font-size:2rem}
+  .confetti{position:fixed;top:-20px;font-size:1.6rem;pointer-events:none;animation:fall linear forwards;z-index:99}
+  @keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+  @media (max-width:500px){
+    .question{font-size:1.7rem}
+    .answer{font-size:1.2rem;padding:14px}
+    h1{font-size:1.5rem}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">Lern<span>-Welt</span> 🌍</div>
+    <div class="stats">
+      <span class="pill"><span id="hAvatar">🦊</span> <span id="hName">Gast</span></span>
+      <span class="pill">⭐ <span id="hStars">0</span></span>
+      <span class="pill">🪙 <span id="hCoins">0</span></span>
+    </div>
+  </header>
+
+  <!-- START -->
+  <section class="screen" id="sStart">
+    <div class="card center">
+      <div class="big">🦊</div>
+      <h1>Willkommen in der Lern-Welt!</h1>
+      <p class="sub">Lerne Mathe, Deutsch und Englisch, sammle Sterne und Münzen.</p>
+      <input type="text" id="nameInput" placeholder="Wie heißt du?" maxlength="20">
+      <button class="btn green" onclick="startApp()">Los geht's! 🚀</button>
+    </div>
+  </section>
+
+  <!-- FÄCHER -->
+  <section class="screen" id="sHome">
+    <h1>Hallo <span id="homeName"></span>! 👋</h1>
+    <p class="sub">Was möchtest du heute lernen?</p>
+    <div class="grid" id="subjectGrid"></div>
+    <div class="grid mt">
+      <button class="tile" style="background:var(--pink)" onclick="openShop()">
+        <span class="ico">🛍️</span><b>Laden</b><small>Tiere freischalten</small>
+      </button>
+      <button class="tile" style="background:#64748b" onclick="logout()">
+        <span class="ico">👋</span><b>Abmelden</b><small>Anderer Name</small>
+      </button>
+    </div>
+  </section>
+
+  <!-- LEVELS -->
+  <section class="screen" id="sLevels">
+    <button class="back" onclick="show('sHome')">← Zurück</button>
+    <h2 id="levelsTitle"></h2>
+    <div id="levelList"></div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="screen" id="sQuiz">
+    <button class="back" onclick="quitQuiz()">✕ Abbrechen</button>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="card">
+      <div class="question" id="question"></div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </section>
+
+  <!-- ERGEBNIS -->
+  <section class="screen" id="sResult">
+    <div class="card center">
+      <div class="big" id="resEmoji">🎉</div>
+      <h1 id="resTitle"></h1>
+      <p class="sub" id="resText"></p>
+      <div class="big" id="resStars" style="font-size:3rem"></div>
+      <div class="mt">
+        <button class="btn gray" onclick="retry()">Nochmal 🔁</button>
+        <button class="btn green" onclick="show('sLevels')">Weiter ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LADEN -->
+  <section class="screen" id="sShop">
+    <button class="back" onclick="show('sHome')">← Zurück</button>
+    <h2>🛍️ Tier-Laden</h2>
+    <p class="sub">Kaufe dir mit deinen Münzen ein neues Tier!</p>
+    <div class="shop" id="shopList"></div>
+  </section>
+
+</div>
+
+<script>
+/* ============ DATEN ============ */
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+
+// Macht aus einer richtigen Zahl 4 Antwortmöglichkeiten
+function numOptions(correct){
+  const set = new Set([correct]);
+  while(set.size<4){
+    const d = correct + rnd(-10,10);
+    if(d>=0 && d!==correct) set.add(d);
+  }
+  return shuffle([...set]).map(String);
+}
+
+const SUBJECTS = {
+  mathe:{
+    name:"Mathe", ico:"🔢", color:"var(--blue)",
+    levels:[
+      {name:"Plus bis 10",    gen:()=>{const a=rnd(0,10),b=rnd(0,10-a);return{q:`${a} + ${b} = ?`,a:String(a+b),o:numOptions(a+b)}}},
+      {name:"Minus bis 10",   gen:()=>{const a=rnd(1,10),b=rnd(0,a);return{q:`${a} − ${b} = ?`,a:String(a-b),o:numOptions(a-b)}}},
+      {name:"Plus bis 100",   gen:()=>{const a=rnd(10,60),b=rnd(5,39);return{q:`${a} + ${b} = ?`,a:String(a+b),o:numOptions(a+b)}}},
+      {name:"Minus bis 100",  gen:()=>{const a=rnd(30,100),b=rnd(5,a);return{q:`${a} − ${b} = ?`,a:String(a-b),o:numOptions(a-b)}}},
+      {name:"Einmaleins",     gen:()=>{const a=rnd(1,10),b=rnd(1,10);return{q:`${a} × ${b} = ?`,a:String(a*b),o:numOptions(a*b)}}},
+      {name:"Geteilt",        gen:()=>{const b=rnd(1,10),r=rnd(1,10);return{q:`${b*r} : ${b} = ?`,a:String(r),o:numOptions(r)}}},
+    ]
+  },
+  deutsch:{
+    name:"Deutsch", ico:"📖", color:"var(--orange)",
+    levels:[
+      {name:"Der, die oder das?", list:[
+        ["Hund","der"],["Katze","die"],["Haus","das"],["Baum","der"],["Sonne","die"],["Auto","das"],
+        ["Tisch","der"],["Blume","die"],["Buch","das"],["Ball","der"],["Schule","die"],["Fenster","das"],
+        ["Apfel","der"],["Maus","die"],["Kind","das"],["Mond","der"],["Tür","die"],["Pferd","das"]],
+        gen(){const [w,a]=this.list[rnd(0,this.list.length-1)];return{q:`___ ${w}`,a,o:["der","die","das"]}}},
+      {name:"Richtig geschrieben?", list:[
+        ["Fahrrad",["Farrad","Fahrad","Farhrad"]],["Schule",["Schuhle","Shule","Schulle"]],
+        ["Vogel",["Fogel","Vogl","Voggel"]],["Straße",["Strase","Strasse","Strahse"]],
+        ["Fußball",["Fusball","Fuhsball","Fußbal"]],["Zahn",["Zan","Tsahn","Zahnn"]],
+        ["Wasser",["Waser","Wahser","Wassa"]],["Freund",["Froind","Freunt","Frreund"]],
+        ["Kuchen",["Kuhchen","Kuchn","Kuchenn"]],["Fisch",["Fiesch","Fich","Fisc"]]],
+        gen(){const [w,f]=this.list[rnd(0,this.list.length-1)];return{q:"Welches Wort ist richtig?",a:w,o:shuffle([w,...f])}}},
+      {name:"Gegenteile", list:[
+        ["groß","klein"],["heiß","kalt"],["schnell","langsam"],["hell","dunkel"],["laut","leise"],
+        ["alt","jung"],["oben","unten"],["voll","leer"],["nass","trocken"],["dick","dünn"],["stark","schwach"]],
+        gen(){const i=rnd(0,this.list.length-1),[w,a]=this.list[i];
+          const others=shuffle(this.list.filter((_,j)=>j!==i).map(x=>x[1])).slice(0,3);
+          return{q:`Gegenteil von „${w}“`,a,o:shuffle([a,...others])}}},
+    ]
+  },
+  englisch:{
+    name:"Englisch", ico:"🇬🇧", color:"var(--purple)",
+    levels:[
+      {name:"Farben", list:[["rot","red"],["blau","blue"],["grün","green"],["gelb","yellow"],["schwarz","black"],["weiß","white"],["orange","orange"],["lila","purple"],["braun","brown"],["rosa","pink"]]},
+      {name:"Tiere", list:[["Hund","dog"],["Katze","cat"],["Vogel","bird"],["Pferd","horse"],["Fisch","fish"],["Maus","mouse"],["Kuh","cow"],["Schwein","pig"],["Löwe","lion"],["Affe","monkey"]]},
+      {name:"Zahlen", list:[["eins","one"],["zwei","two"],["drei","three"],["vier","four"],["fünf","five"],["sechs","six"],["sieben","seven"],["acht","eight"],["neun","nine"],["zehn","ten"]]},
+      {name:"Essen", list:[["Apfel","apple"],["Brot","bread"],["Milch","milk"],["Wasser","water"],["Käse","cheese"],["Ei","egg"],["Banane","banana"],["Kuchen","cake"],["Saft","juice"],["Nudeln","noodles"]]},
+    ].map(l=>({...l,gen(){const i=rnd(0,this.list.length-1),[de,en]=this.list[i];
+      const others=shuffle(this.list.filter((_,j)=>j!==i).map(x=>x[1])).slice(0,3);
+      return{q:`Was heißt „${de}“ auf Englisch?`,a:en,o:shuffle([en,...others])}}}))
+  }
+};
+
+const ANIMALS = [
+  {ico:"🦊",price:0},{ico:"🐶",price:20},{ico:"🐱",price:20},{ico:"🐼",price:40},
+  {ico:"🐸",price:40},{ico:"🦁",price:60},{ico:"🐯",price:60},{ico:"🦄",price:100},
+  {ico:"🐲",price:150},{ico:"🦖",price:200},{ico:"🐧",price:80},{ico:"🐵",price:50}
+];
+
+/* ============ SPEICHERN ============ */
+const KEY = "lernwelt_v1";
+let state = {name:"", coins:0, stars:{}, avatar:"🦊", owned:["🦊"]};
+function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s) state={...state,...s}; }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} updateHeader(); }
+
+function totalStars(){ return Object.values(state.stars).reduce((a,b)=>a+b,0); }
+function updateHeader(){
+  hName.textContent = state.name || "Gast";
+  hAvatar.textContent = state.avatar;
+  hStars.textContent = totalStars();
+  hCoins.textContent = state.coins;
+}
+
+/* ============ NAVIGATION ============ */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==="sLevels") renderLevels();
+  window.scrollTo(0,0);
+}
+
+function startApp(){
+  const n = nameInput.value.trim();
+  if(!n){ nameInput.focus(); nameInput.placeholder="Bitte gib deinen Namen ein 🙂"; return; }
+  state.name = n; save(); goHome();
+}
+nameInput.addEventListener("keydown",e=>{ if(e.key==="Enter") startApp(); });
+
+function logout(){ state.name=""; save(); nameInput.value=""; show("sStart"); }
+
+function goHome(){
+  homeName.textContent = state.name;
+  subjectGrid.innerHTML = Object.entries(SUBJECTS).map(([k,s])=>{
+    const max = s.levels.length*3;
+    const got = s.levels.reduce((a,_,i)=>a+(state.stars[k+i]||0),0);
+    return `<button class="tile" style="background:${s.color}" onclick="openSubject('${k}')">
+      <span class="ico">${s.ico}</span><b>${s.name}</b><small>⭐ ${got} / ${max}</small></button>`;
+  }).join("");
+  show("sHome");
+}
+
+/* ============ LEVELS ============ */
+let curSubject=null, curLevel=0;
+function openSubject(k){ curSubject=k; show("sLevels"); }
+function renderLevels(){
+  const s = SUBJECTS[curSubject];
+  levelsTitle.textContent = s.ico+" "+s.name;
+  levelList.innerHTML = s.levels.map((l,i)=>{
+    const st = state.stars[curSubject+i]||0;
+    const locked = i>0 && !(state.stars[curSubject+(i-1)]>0);
+    return `<button class="level" ${locked?'disabled style="opacity:.5"':''} onclick="startQuiz(${i})">
+      <div class="num" style="background:${s.color}">${locked?"🔒":i+1}</div>
+      <div class="info"><b>${l.name}</b><br><small style="color:var(--muted)">10 Aufgaben</small></div>
+      <div class="stars">${"⭐".repeat(st)}${"☆".repeat(3-st)}</div></button>`;
+  }).join("");
+}
+
+/* ============ QUIZ ============ */
+const TOTAL = 10;
+let qIndex=0, correctCount=0, current=null, locked=false;
+const PRAISE=["Super! 🎉","Toll! 🌟","Klasse! 👏","Richtig! ✅","Spitze! 💪","Genau! 😃"];
+
+function startQuiz(i){ curLevel=i; qIndex=0; correctCount=0; show("sQuiz"); nextQuestion(); }
+function retry(){ startQuiz(curLevel); }
+function quitQuiz(){ if(confirm("Wirklich abbrechen?")) show("sLevels"); }
+
+function nextQuestion(){
+  if(qIndex>=TOTAL) return finish();
+  locked=false;
+  current = SUBJECTS[curSubject].levels[curLevel].gen();
+  bar.style.width = (qIndex/TOTAL*100)+"%";
+  question.textContent = current.q;
+  feedback.textContent = "";
+  answers.innerHTML = "";
+  current.o.forEach(opt=>{
+    const b=document.createElement("button");
+    b.className="answer"; b.textContent=opt;
+    b.onclick=()=>choose(b,opt);
+    answers.appendChild(b);
+  });
+}
+
+function choose(btn,opt){
+  if(locked) return; locked=true;
+  if(opt===current.a){
+    btn.classList.add("right"); correctCount++;
+    feedback.style.color="var(--green)";
+    feedback.textContent = PRAISE[rnd(0,PRAISE.length-1)];
+    beep(660);
+  }else{
+    btn.classList.add("wrong");
+    [...answers.children].forEach(b=>{ if(b.textContent===current.a) b.classList.add("right"); });
+    feedback.style.color="var(--red)";
+    feedback.textContent = "Leider falsch. Richtig ist: "+current.a;
+    beep(200);
+  }
+  qIndex++;
+  setTimeout(nextQuestion, opt===current.a?900:1800);
+}
+
+function finish(){
+  bar.style.width="100%";
+  const stars = correctCount>=10?3 : correctCount>=8?2 : correctCount>=5?1 : 0;
+  const key = curSubject+curLevel;
+  const old = state.stars[key]||0;
+  if(stars>old) state.stars[key]=stars;
+  const coins = correctCount*2 + stars*5;
+  state.coins += coins; save();
+
+  resEmoji.textContent = stars===3?"🏆":stars>=1?"🎉":"💪";
+  resTitle.textContent = stars===3?"Perfekt!":stars>=1?"Gut gemacht!":"Weiter üben!";
+  resText.textContent = `Du hast ${correctCount} von ${TOTAL} richtig und bekommst ${coins} Münzen 🪙`;
+  resStars.textContent = "⭐".repeat(stars)+"☆".repeat(3-stars);
+  show("sResult");
+  if(stars>0) confetti();
+}
+
+/* ============ LADEN ============ */
+function openShop(){ renderShop(); show("sShop"); }
+function renderShop(){
+  shopList.innerHTML = ANIMALS.map(a=>{
+    const owned = state.owned.includes(a.ico);
+    const active = state.avatar===a.ico;
+    let btn;
+    if(active) btn=`<button class="btn green" disabled>Aktiv ✓</button>`;
+    else if(owned) btn=`<button class="btn" onclick="pick('${a.ico}')">Wählen</button>`;
+    else btn=`<button class="btn ${state.coins>=a.price?'':'gray'}" onclick="buy('${a.ico}',${a.price})">🪙 ${a.price}</button>`;
+    return `<div class="item"><div class="ico">${a.ico}</div>${btn}</div>`;
+  }).join("");
+}
+function buy(ico,price){
+  if(state.coins<price){ alert("Du hast noch nicht genug Münzen. Lerne weiter! 💪"); return; }
+  state.coins-=price; state.owned.push(ico); state.avatar=ico; save(); renderShop(); confetti();
+}
+function pick(ico){ state.avatar=ico; save(); renderShop(); }
+
+/* ============ EFFEKTE ============ */
+function confetti(){
+  const e=["🎉","⭐","🎊","✨","🪙"];
+  for(let i=0;i<30;i++){
+    const c=document.createElement("div");
+    c.className="confetti"; c.textContent=e[rnd(0,e.length-1)];
+    c.style.left=Math.random()*100+"vw";
+    c.style.animationDuration=(1.5+Math.random()*2)+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
+  }
+}
+let audioCtx=null;
+function beep(freq){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
+    g.gain.setValueAtTime(.15,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.25);
+    o.start(); o.stop(audioCtx.currentTime+.25);
+  }catch(e){}
+}
+
+/* ============ START ============ */
+load(); updateHeader();
+if(state.name) goHome(); else show("sStart");
+</script>
+</body>
+</html>
