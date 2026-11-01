@@ -227,6 +227,35 @@ let state = {name:"", coins:0, stars:{}, avatar:"🦊", owned:["🦊"]};
 function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s) state={...state,...s}; }catch(e){} }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} updateHeader(); }
 
+/* ============ MÜNZ-CODE (für die Konsole) ============
+   Browser-Konsole öffnen (F12) und eintippen:  addCoins(42)            */
+window.addCoins = function(amount){
+  amount = Math.floor(Number(amount));
+  if(!Number.isFinite(amount)){ console.log("Bitte eine Zahl angeben, z.B. addCoins(42)"); return; }
+  state.coins = Math.max(0, state.coins + amount);
+  save();
+  if(document.getElementById("sShop").classList.contains("active")) renderShop();
+  if(document.getElementById("sHome").classList.contains("active")) goHome();
+  if(amount>0) confetti();
+  console.log("🪙 " + amount + " Münzen! Du hast jetzt " + state.coins + " Münzen.");
+  return state.coins;
+};
+
+/* Zweite Variante:  lernwelt.log({ event: "muenzen", wert: 42 })
+                     lernwelt.log({ event: "alleTiere" })                */
+window.lernwelt = {
+  log(befehl){
+    if(!befehl || !befehl.event){ console.log('Beispiel: lernwelt.log({ event: "muenzen", wert: 42 })'); return; }
+    if(befehl.event === "muenzen") return addCoins(befehl.wert);
+    if(befehl.event === "alleTiere"){
+      state.owned = ANIMALS.map(a=>a.ico); save();
+      if(document.getElementById("sShop").classList.contains("active")) renderShop();
+      confetti(); console.log("🦄 Alle Tiere freigeschaltet!"); return;
+    }
+    console.log('Unbekanntes event. Probier "muenzen" oder "alleTiere".');
+  }
+};
+
 function totalStars(){ return Object.values(state.stars).reduce((a,b)=>a+b,0); }
 function updateHeader(){
   hName.textContent = state.name || "Gast";
